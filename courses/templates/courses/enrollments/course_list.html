@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Записи на курс «{{ course.title }}»{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <a href="{% url 'manage_course_list' %}" class="text-emerald-400 hover:underline mb-4 inline-block">← Мои курсы</a>
+    <h1 class="text-3xl font-bold text-white mb-2">Записи на курс «{{ course.title }}»</h1>
+    <p class="text-gray-400">Студенты, записанные на этот курс</p>
+</div>
+<div class="card">
+    {% for enrollment in enrollments %}
+    <div class="flex items-center justify-between py-4 border-b border-dark-600 last:border-0">
+        <div>
+            <span class="font-medium text-white">{{ enrollment.user.username }}</span>
+            <span class="text-gray-500 text-sm ml-2">{{ enrollment.user.get_full_name|default:"" }}</span>
+            <p class="text-sm text-gray-400">Записан: {{ enrollment.enrolled_at|date:"d.m.Y H:i" }} • {{ enrollment.get_status_display }}</p>
+        </div>
+        <form action="{% url 'course_enrollment_remove' course.id enrollment.id %}" method="post" onsubmit="return confirm('Удалить запись?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger text-sm">Удалить</button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="text-gray-400 py-8 text-center">Пока нет записей на этот курс</p>
+    {% endfor %}
+</div>
+{% endblock %}

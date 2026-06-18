@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Курс «{{ course.title }}»{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <a href="{% url 'enrollment_list' %}" class="text-emerald-400 hover:underline mb-4 inline-block">← Мои записи</a>
+    <h1 class="text-3xl font-bold text-white mb-2">{{ course.title }}</h1>
+    <p class="text-gray-400">{{ course.overview|truncatewords:30 }}</p>
+</div>
+<div class="card">
+    <h2 class="text-lg font-semibold text-white mb-4">Модули курса</h2>
+    <div class="space-y-3">
+        {% for m in modules %}
+        <a href="{% url 'learn_module' m.id %}" class="block p-4 rounded-lg bg-dark-700 hover:bg-dark-600 border border-dark-600 flex items-center justify-between transition">
+            <div class="flex items-center gap-3">
+                <span class="{% if m.id in completed_module_ids %}text-emerald-400{% else %}text-gray-500{% endif %}">
+                    {% if m.id in completed_module_ids %}✓{% else %}○{% endif %}
+                </span>
+                <div>
+                    <span class="text-xs text-gray-500">Модуль {{ forloop.counter }}</span>
+                    <span class="block text-white font-medium">{{ m.title }}</span>
+                </div>
+            </div>
+            <span class="text-emerald-400 text-sm">Изучить →</span>
+        </a>
+        {% empty %}
+        <p class="text-gray-400">Модули пока не добавлены</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+[
+{
+  "model": "courses.subject",
+  "pk": 4,
+  "fields": {
+    "title": "Мультиагентные системы",
+    "slug": "multiagentnye-sistemy"
+  }
+},
+{
+  "model": "courses.subject",
+  "pk": 5,
+  "fields": {
+    "title": "Дизайн LLM приложений",
+    "slug": "dizajn-llm-prilozhenij"
+  }
+},
+{
+  "model": "courses.subject",
+  "pk": 6,
+  "fields": {
+    "title": "Изучения SQL",
+    "slug": "Ler_SQL"
+  }
+}
+]

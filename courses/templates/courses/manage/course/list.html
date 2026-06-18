@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Мои курсы{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Мои курсы</h1>
+    <p class="text-gray-400">Создайте курс, нажмите «Модули» для добавления разделов, затем «Контент» для материала</p>
+</div>
+<div class="mb-6">
+    <a href="{% url 'course_create' %}" class="btn-primary">+ Создать курс</a>
+</div>
+<div class="grid gap-4">
+    {% for course in object_list %}
+    <div class="card flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <span class="text-xs text-emerald-400">{{ course.subject.title }}</span>
+            <h3 class="text-lg font-semibold text-white">{{ course.title }}</h3>
+            <p class="text-sm text-gray-500">{{ course.modules.count }} модулей</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'course_edit' course.id %}" class="btn-secondary text-sm">Редактировать</a>
+            <a href="{% url 'course_module_update' course.id %}" class="btn-secondary text-sm" title="Добавить и упорядочить модули">Модули</a>
+            {% if course.modules.count > 0 %}
+            <a href="{% url 'module_content_list' course.modules.all.0.id %}" class="btn-secondary text-sm">Контент</a>
+            {% endif %}
+            <a href="{% url 'course_enrollment_list' course.id %}" class="btn-secondary text-sm">Записи</a>
+            <a href="{% url 'course_delete' course.id %}" class="btn-danger text-sm">Удалить</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card text-center py-16 text-gray-400">
+        <p class="text-lg mb-4">Вы ещё не создали ни одного курса</p>
+        <a href="{% url 'course_create' %}" class="btn-primary inline-block">Создать первый курс</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

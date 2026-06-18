@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Редактировать{% else %}Добавить{% endif %} контент{% endblock %}
+{% block content %}
+<style>
+/* Форма контента: тёмный фон и светлый текст для видимости */
+.content-edit-form input,
+.content-edit-form textarea,
+.content-edit-form select {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    border-color: #4b5563 !important;
+}
+.content-edit-form textarea {
+    min-height: 200px;
+    width: 100%;
+}
+</style>
+<div class="max-w-5xl">
+    <h1 class="text-3xl font-bold text-white mb-6">
+        {% if object %}Редактировать «{{ object.title }}»{% else %}Добавить контент{% endif %}
+    </h1>
+    <div class="card">
+        <form action="" method="post" enctype="multipart/form-data" class="content-edit-form space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="text-gray-500 text-xs mt-1">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<p class="text-red-400 text-sm mt-1">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% endfor %}
+
+            {% if figure_formset %}
+            <div class="pt-6 mt-6 border-t-2 border-emerald-500/50 bg-emerald-900/20 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-emerald-400 mb-2">📷 Рисунки в тексте</h3>
+                <p class="text-gray-300 mb-2">Если в тексте есть <code class="bg-dark-700 px-1 rounded">[рисунок 1.1]</code>, заполните строку ниже и нажмите «Сохранить»:</p>
+                <ul class="text-gray-400 text-sm mb-4 list-disc list-inside">
+                    <li>Ключ: <strong>1.1</strong> (то же число, что в скобках)</li>
+                    <li>Подпись: Рисунок 1.1</li>
+                    <li>Изображение: выберите файл</li>
+                </ul>
+                {% if figure_formset.non_form_errors %}<p class="text-red-400 text-sm mb-2">{{ figure_formset.non_form_errors }}</p>{% endif %}
+                {{ figure_formset.management_form }}
+                <div class="space-y-4">
+                    {% for f in figure_formset %}
+                    <div class="p-4 bg-dark-700 rounded-lg border border-dark-600 flex flex-wrap gap-4 items-end {% if f.errors %}border-red-500{% endif %}">
+                        {{ f.id }}
+                        <div class="flex-1 min-w-[120px]">
+                            <label class="block text-sm text-gray-400 mb-1">Ключ (№)</label>
+                            {{ f.key }}
+                            {% if f.key.errors %}<p class="text-red-400 text-xs">{{ f.key.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex-1 min-w-[180px]">
+                            <label class="block text-sm text-gray-400 mb-1">Подпись</label>
+                            {{ f.caption }}
+                            {% if f.caption.errors %}<p class="text-red-400 text-xs">{{ f.caption.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-sm text-gray-400 mb-1">Изображение <span class="text-gray-500">(макс. 10 МБ)</span></label>
+                            {{ f.image }}
+                            {% if f.image.errors %}<p class="text-red-400 text-xs">{{ f.image.errors.0 }}</p>{% endif %}
+                        </div>
+                        {% if f.non_field_errors %}<p class="text-red-400 text-sm w-full">{{ f.non_field_errors.0 }}</p>{% endif %}
+                        {% if f.instance.pk %}<div>{{ f.DELETE }} <label class="text-red-400 text-sm cursor-pointer">Удалить</label></div>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="flex gap-3 pt-4">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="javascript:history.back()" class="btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

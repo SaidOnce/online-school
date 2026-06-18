@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Редактировать курс{% else %}Новый курс{% endif %}{% endblock %}
+{% block content %}
+<div class="max-w-2xl">
+    <h1 class="text-3xl font-bold text-white mb-6">
+        {% if object %}Редактировать «{{ object.title }}»{% else %}Создать новый курс{% endif %}
+    </h1>
+    <div class="card">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="text-gray-500 text-xs mt-1">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<p class="text-red-400 text-sm mt-1">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="flex gap-3 pt-4">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{% url 'manage_course_list' %}" class="btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

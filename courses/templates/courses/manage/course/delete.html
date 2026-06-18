@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Удалить курс{% endblock %}
+{% block content %}
+<div class="max-w-xl">
+    <h1 class="text-3xl font-bold text-white mb-6">Удалить курс</h1>
+    <div class="card">
+        <p class="text-gray-300 mb-6">Вы уверены, что хотите удалить курс «{{ object.title }}»? Все модули и контент будут удалены.</p>
+        <form method="post" class="flex gap-3">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger">Удалить</button>
+            <a href="{% url 'manage_course_list' %}" class="btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

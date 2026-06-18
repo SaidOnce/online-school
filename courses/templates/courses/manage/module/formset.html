@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Модули — {{ course.title }}{% endblock %}
+{% block content %}
+<form id="csrf-form" style="display:none">{% csrf_token %}</form>
+<div class="mb-8">
+    <a href="{% url 'manage_course_list' %}" class="text-emerald-400 hover:underline mb-4 inline-block">← Мои курсы</a>
+    <h1 class="text-3xl font-bold text-white mb-2">Модули курса «{{ course.title }}»</h1>
+    <p class="text-gray-400">Добавьте модули и упорядочьте их перетаскиванием. Затем нажмите «Сохранить».</p>
+</div>
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        <div class="mb-6">
+            <button type="button" id="add-module-btn" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition">
+                <span class="text-xl">+</span> Добавить модуль
+            </button>
+            <p class="text-gray-500 text-sm mt-2">Заполните форму и нажмите «Сохранить модули» внизу</p>
+        </div>
+
+        <h3 class="text-sm font-medium text-gray-400 uppercase mb-3">Список модулей</h3>
+        <ul id="course-modules" class="space-y-4">
+            {% for form in formset %}
+            <li data-id="{{ form.instance.id|default:'' }}" class="p-4 bg-dark-700 rounded-lg border border-dark-600 cursor-move {% if form.instance.id %}sortable-module{% else %}new-module-form opacity-90{% endif %}">
+                {{ form.id }}
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        {% if form.instance.pk %}
+                        <a href="{% url 'module_content_list' form.instance.id %}" class="block text-emerald-400 hover:text-emerald-300 font-medium mb-1">«{{ form.instance.title }}» — Контент →</a>
+                        {% endif %}
+                        <label class="block text-sm text-gray-400 mb-1">Название модуля</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="flex items-end gap-2">
+                        {% if form.instance.pk %}{{ form.DELETE }} <label class="text-red-400 text-sm cursor-pointer">Удалить</label>{% endif %}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm text-gray-400 mb-1">Описание (необязательно)</label>
+                    {{ form.description }}
+                </div>
+                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <template id="empty-form-template">
+            <li data-id="" class="p-4 bg-dark-700 rounded-lg border border-emerald-600/50 border-dashed new-module-form opacity-90">
+                {% with form=formset.empty_form %}
+                {{ form.id }}
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Название модуля</label>
+                        {{ form.title }}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm text-gray-400 mb-1">Описание (необязательно)</label>
+                    {{ form.description }}
+                </div>
+                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                {% endwith %}
+            </li>
+        </template>
+
+        <div class="mt-6 flex gap-3">
+            <button type="submit" class="btn-primary">Сохранить модули</button>
+            <a href="{% url 'manage_course_list' %}" class="btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block include_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5sortable/0.13.3/html5sortable.min.js"></script>
+{% endblock %}
+{% block domready_script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const moduleOrderUrl = '{% url "module_order" %}';
+    const modulesList = document.querySelector('#course-modules');
+    const addBtn = document.getElementById('add-module-btn');
+    const template = document.getElementById('empty-form-template');
+    const totalInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+
+    if (addBtn && template && totalInput) {
+        addBtn.addEventListener('click', function() {
+            const total = parseInt(totalInput.value, 10);
+            const clone = template.content.querySelector('li').cloneNode(true);
+            const html = clone.outerHTML.replace(/__prefix__/g, total);
+            modulesList.insertAdjacentHTML('beforeend', html);
+            totalInput.value = total + 1;
+        });
+    }
+
+    if (modulesList) {
+        sortable(modulesList, { forcePlaceholderSize: true, placeholderClass: 'placeholder', items: 'li.sortable-module' });
+        modulesList.addEventListener('sortupdate', function() {
+            const order = {};
+            document.querySelectorAll('#course-modules li.sortable-module[data-id]').forEach(function(el, i) {
+                if (el.dataset.id) order[el.dataset.id] = i;
+            });
+            if (Object.keys(order).length > 0) {
+                fetch(moduleOrderUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''},
+                    body: JSON.stringify(order)
+                }).then(function(r) { return r.json(); }).then(function() { location.reload(); });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

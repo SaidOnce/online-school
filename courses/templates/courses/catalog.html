@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Каталог курсов{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Каталог курсов</h1>
+    <p class="text-gray-400">Выберите курс и запишитесь на обучение</p>
+</div>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for course in courses %}
+    <div class="card hover:border-emerald-500/50 transition">
+        <span class="text-xs text-emerald-400 font-medium">{{ course.subject.title }}</span>
+        <h3 class="text-xl font-semibold text-white mt-2">{{ course.title }}</h3>
+        <p class="text-gray-400 text-sm mt-2 line-clamp-2">{{ course.overview|truncatewords:20 }}</p>
+        <div class="mt-4 flex items-center justify-between">
+            <span class="text-gray-500 text-sm">{{ course.modules.count }} модулей</span>
+            {% if request.user.is_authenticated %}
+                {% if course.id in enrolled_course_ids %}
+                <a href="{% url 'learn_course' course.id %}" class="text-emerald-400 text-sm hover:underline">Изучать →</a>
+                {% else %}
+                <form action="{% url 'enroll' course.id %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-primary text-sm">Записаться</button>
+                </form>
+                {% endif %}
+            {% else %}
+            <a href="{% url 'login' %}?next={% url 'course_catalog' %}" class="btn-primary text-sm">Войти для записи</a>
+            {% endif %}
+        </div>
+        <a href="{% url 'course_review_list' course.id %}" class="text-emerald-400 text-sm mt-2 inline-block hover:underline">Отзывы ({{ course.reviews.count }})</a>
+    </div>
+    {% empty %}
+    <div class="col-span-full card text-center py-16 text-gray-400">
+        <p class="text-lg">Курсы пока не добавлены</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

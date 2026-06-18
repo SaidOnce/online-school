@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Редактировать отзыв{% else %}Новый отзыв{% endif %} — {{ course.title }}{% endblock %}
+{% block content %}
+<div class="max-w-xl">
+    <a href="{% url 'course_review_list' course.id %}" class="text-emerald-400 hover:underline mb-4 inline-block">← Отзывы о курсе</a>
+    <h1 class="text-3xl font-bold text-white mb-6">
+        {% if object %}Редактировать отзыв{% else %}Оставить отзыв{% endif %} — {{ course.title }}
+    </h1>
+    <div class="card">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Оценка</label>
+                {{ form.rating }}
+                {% if form.rating.errors %}<p class="text-red-400 text-sm mt-1">{{ form.rating.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Текст отзыва (необязательно)</label>
+                {{ form.text }}
+                {% if form.text.errors %}<p class="text-red-400 text-sm mt-1">{{ form.text.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{% url 'course_review_list' course.id %}" class="btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

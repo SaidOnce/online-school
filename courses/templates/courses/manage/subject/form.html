@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Редактировать категорию{% else %}Новая категория{% endif %}{% endblock %}
+{% block content %}
+<div class="max-w-xl">
+    <h1 class="text-3xl font-bold text-white mb-6">
+        {% if object %}Редактировать «{{ object.title }}»{% else %}Новая категория{% endif %}
+    </h1>
+    <div class="card">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Название</label>
+                {{ form.title }}
+                {% if form.title.errors %}<p class="text-red-400 text-sm mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Slug (для URL)</label>
+                {{ form.slug }}
+                <p class="text-gray-500 text-xs mt-1">Латинские буквы, цифры, дефисы. Например: programming</p>
+                {% if form.slug.errors %}<p class="text-red-400 text-sm mt-1">{{ form.slug.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{% url 'subject_list' %}" class="btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

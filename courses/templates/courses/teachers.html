@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Наши преподаватели{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Опытные преподаватели</h1>
+    <p class="text-gray-400">Курсы создают практикующие специалисты</p>
+</div>
+
+<div class="grid md:grid-cols-3 gap-8">
+    <div class="card text-center">
+        <div class="aspect-square overflow-hidden rounded-xl mb-4">
+            <img src="{{ MEDIA_URL }}images/AI Teacher.jpg" alt="Леонид Иванович Дикаприн" class="w-full h-full object-cover" onerror="this.style.display='none'">
+        </div>
+        <p class="text-white font-medium">Леонид Иванович Дикаприн</p>
+        <p class="text-gray-400 text-sm mt-1">Эксперт в области искусственного интеллекта</p>
+    </div>
+    <div class="card text-center">
+        <div class="aspect-square overflow-hidden rounded-xl mb-4">
+            <img src="{{ MEDIA_URL }}images/Web Teacher.jpg" alt="Ольга Николаевна Бернова" class="w-full h-full object-cover" onerror="this.style.display='none'">
+        </div>
+        <p class="text-white font-medium">Ольга Николаевна Бернова</p>
+        <p class="text-gray-400 text-sm mt-1">Преподаватель курса «Web-разработка»</p>
+    </div>
+    <div class="card text-center">
+        <div class="aspect-square overflow-hidden rounded-xl mb-4">
+            <img src="{{ MEDIA_URL }}images/Mob Teacher.jpg" alt="Михаил Петрович Димондов" class="w-full h-full object-cover" onerror="this.style.display='none'">
+        </div>
+        <p class="text-white font-medium">Михаил Петрович Димондов</p>
+        <p class="text-gray-400 text-sm mt-1">Преподаватель курса «Мобильная разработка»</p>
+    </div>
+</div>
+{% endblock %}

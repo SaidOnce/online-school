@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Отзывы студентов{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Отзывы студентов</h1>
+    <p class="text-gray-400">Мнение тех, кто уже прошёл обучение</p>
+</div>
+
+<div class="bg-gray-100 rounded-2xl p-8 -mx-4 sm:-mx-0">
+<div class="grid md:grid-cols-2 gap-6">
+    {% for review in reviews %}
+    <div class="bg-white rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold text-lg flex-shrink-0">
+                {% with name=review.user.get_full_name|default:review.user.username %}{{ name|slice:":2"|upper }}{% endwith %}
+            </div>
+            <div>
+                <h3 class="font-semibold text-gray-800">{{ review.user.get_full_name|default:review.user.username }}</h3>
+                <span class="text-yellow-500 text-sm">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+            </div>
+        </div>
+        <div class="review-body mb-3">
+            <p class="text-gray-600 text-sm leading-relaxed">
+                «<span class="review-short">{% if review.text %}{{ review.text|truncatewords:25 }}{% else %}Отличный курс!{% endif %}</span><span class="review-full hidden">{% if review.text %}{{ review.text }}{% else %}Отличный курс!{% endif %}</span>»
+            </p>
+        </div>
+        {% if review.text %}
+        <button type="button" class="text-emerald-500 hover:text-emerald-600 text-sm font-medium read-more-btn" data-expanded="false">Читать полностью</button>
+        {% endif %}
+        <div class="mt-4 flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-gray-100 rounded-full text-gray-600 text-sm">{{ review.course.title }}</span>
+            <span class="px-3 py-1 bg-gray-100 rounded-full text-gray-600 text-sm">{{ review.course.subject.title }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="md:col-span-2 bg-white rounded-2xl p-12 text-center text-gray-500">
+        <p class="mb-4">Пока нет отзывов</p>
+        <a href="{% url 'course_catalog' %}" class="text-emerald-500 hover:text-emerald-600 font-medium">Перейти в каталог →</a>
+    </div>
+    {% endfor %}
+
+    {# Дополнительные отзывы #}
+    <div class="bg-white rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold text-lg flex-shrink-0">ИГ</div>
+            <div>
+                <h3 class="font-semibold text-gray-800">Иван Григорьевич</h3>
+                <span class="text-yellow-500 text-sm">★★★★★</span>
+            </div>
+        </div>
+        <p class="text-gray-600 text-sm leading-relaxed mb-3">«Очень понравились бюджетные тарифы и положительные отзывы пользователей»</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-gray-100 rounded-full text-gray-600 text-sm">Онлайн-курсы</span>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold text-lg flex-shrink-0">СМ</div>
+            <div>
+                <h3 class="font-semibold text-gray-800">София Михайловна</h3>
+                <span class="text-yellow-500 text-sm">★★★★★</span>
+            </div>
+        </div>
+        <p class="text-gray-600 text-sm leading-relaxed mb-3">«Выбрали онлайн-школу, т.к. тут в наличии очень актуальные и интересные курсы, уроки, задания и т.д. Рекомендуем всем»</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-gray-100 rounded-full text-gray-600 text-sm">IT в бизнесе</span>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold text-lg flex-shrink-0">С</div>
+            <div>
+                <h3 class="font-semibold text-gray-800">Сергей</h3>
+                <span class="text-yellow-500 text-sm">★★★★★</span>
+            </div>
+        </div>
+        <p class="text-gray-600 text-sm leading-relaxed mb-3">«Это отличное решение для быстрого старта, все настроено, остается только изучать. Особенно здорово описаны первые шаги обучения»</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-gray-100 rounded-full text-gray-600 text-sm">Веб-разработка</span>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block domready_script %}
+<script>
+document.querySelectorAll('.read-more-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var card = this.closest('.bg-white');
+        var short = card.querySelector('.review-short');
+        var full = card.querySelector('.review-full');
+        if (this.dataset.expanded === 'false') {
+            short.classList.add('hidden');
+            full.classList.remove('hidden');
+            this.textContent = 'Свернуть';
+            this.dataset.expanded = 'true';
+        } else {
+            short.classList.remove('hidden');
+            full.classList.add('hidden');
+            this.textContent = 'Читать полностью';
+            this.dataset.expanded = 'false';
+        }
+    });
+});
+</script>
+{% endblock %}

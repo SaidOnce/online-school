@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load course %}
+{% block title %}Модуль {{ module.order|add:1 }} — {{ course.title }}{% endblock %}
+{% block content %}
+<form id="csrf-form" style="display:none">{% csrf_token %}</form>
+<div class="mb-8">
+    <a href="{% url 'course_module_update' course.id %}" class="text-emerald-400 hover:underline mb-4 inline-block">← Модули курса</a>
+    <h1 class="text-3xl font-bold text-white mb-2">«{{ course.title }}»</h1>
+    <p class="text-gray-400">Модуль {{ module.order|add:1 }}: {{ module.title }}</p>
+</div>
+<div class="grid lg:grid-cols-5 gap-6">
+    <div class="lg:col-span-1">
+        <div class="card">
+            <h3 class="text-sm font-medium text-gray-400 uppercase mb-4">Модули</h3>
+            <ul id="modules" class="space-y-2">
+                {% for m in all_modules %}
+                <li data-id="{{ m.id }}" class="p-3 rounded-lg cursor-move {% if m == module %}bg-emerald-900/30 border border-emerald-600{% else %}bg-dark-700 hover:bg-dark-600{% endif %}">
+                    <a href="{% url 'module_content_list' m.id %}" class="block">
+                        <span class="text-xs text-gray-500">Модуль {{ m.order|add:1 }}</span>
+                        <span class="block text-white font-medium">{{ m.title }}</span>
+                    </a>
+                </li>
+                {% empty %}
+                <li class="text-gray-400 text-sm">Модулей нет</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="lg:col-span-4">
+        <div class="card">
+            <h2 class="text-lg font-semibold text-white mb-4">Контент модуля</h2>
+            <div id="module-contents" class="space-y-4 mb-8">
+                {% for content in module.contents.all %}
+                <div data-id="{{ content.id }}" class="p-4 bg-dark-700 rounded-lg border border-dark-600 flex items-center justify-between">
+                    {% with item=content.item %}
+                    {% if item %}
+                    <div>
+                        <span class="text-white font-medium">{{ item.title }}</span>
+                        <span class="text-gray-500 text-sm ml-2">({{ item|model_name }})</span>
+                    </div>
+                    <div class="flex gap-2">
+                        {% with model_type=item|model_name %}
+                        {% if model_type == "text" or model_type == "video" or model_type == "image" or model_type == "file" %}
+                        <a href="{% url 'module_content_update' module.id model_type item.id %}" class="btn-secondary text-sm">Редактировать</a>
+                        {% if model_type == "text" %}<span class="text-gray-500 text-xs self-center">(+ рисунки)</span>{% endif %}
+                        {% endif %}
+                        {% endwith %}
+                        <form action="{% url 'module_content_delete' content.id %}" method="post" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger text-sm">Удалить</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span class="text-gray-400">Ошибка контента</span>
+                    <form action="{% url 'module_content_delete' content.id %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger text-sm">Удалить</button>
+                    </form>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                {% empty %}
+                <p class="text-gray-400">Контент пока не добавлен</p>
+                {% endfor %}
+            </div>
+            <h3 class="text-sm font-medium text-gray-400 uppercase mb-3">Добавить контент</h3>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'module_content_create' module.id 'text' %}" class="btn-secondary text-sm">Текст</a>
+                <a href="{% url 'module_content_create' module.id 'image' %}" class="btn-secondary text-sm">Изображение</a>
+                <a href="{% url 'module_content_create' module.id 'video' %}" class="btn-secondary text-sm">Видео</a>
+                <a href="{% url 'module_content_create' module.id 'file' %}" class="btn-secondary text-sm">Файл</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block include_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5sortable/0.13.3/html5sortable.min.js"></script>
+{% endblock %}
+{% block domready_script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const moduleOrderUrl = '{% url "module_order" %}';
+    const modulesList = document.querySelector('#modules');
+    if (modulesList) {
+        sortable(modulesList, { forcePlaceholderSize: true, placeholderClass: 'placeholder' });
+        modulesList.addEventListener('sortupdate', function() {
+            const order = {};
+            document.querySelectorAll('#modules li[data-id]').forEach((el, i) => {
+                if (el.dataset.id) order[el.dataset.id] = i;
+            });
+            fetch(moduleOrderUrl, {
+                method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''},
+                body: JSON.stringify(order)
+            }).then(r => r.json()).then(() => location.reload());
+        });
+    }
+    const contentOrderUrl = '{% url "content_order" %}';
+    const contentsList = document.querySelector('#module-contents');
+    if (contentsList) {
+        sortable(contentsList, { forcePlaceholderSize: true, placeholderClass: 'placeholder' });
+        contentsList.addEventListener('sortupdate', function() {
+            const order = {};
+            document.querySelectorAll('#module-contents div[data-id]').forEach((el, i) => { order[el.dataset.id] = i; });
+            fetch(contentOrderUrl, {
+                method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''},
+                body: JSON.stringify(order)
+            }).then(r => r.json()).then(() => location.reload());
+        });
+    }
+});
+</script>
+{% endblock %}
